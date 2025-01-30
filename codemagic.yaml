@@ -32,7 +32,6 @@ workflows:
           -configuration Release \
           archive -archivePath build/Runner.xcarchive
 
-          # Maak een .ipa van de .xcarchive
           xcodebuild -exportArchive \
           -archivePath build/Runner.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
