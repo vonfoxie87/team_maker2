@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+  <dict>
+    <key>method</key>
+    <string>app-store</string>
+    <key>teamID</key>
+    <string>Your-Team-ID</string>
+    <key>bundleID</key>
+    <string>com.yourcompany.appname</string>
+    <key>uploadSymbols</key>
+    <true/>
+  </dict>
+</plist>
