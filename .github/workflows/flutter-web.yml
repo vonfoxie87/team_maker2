@@ -22,7 +22,7 @@ jobs:
         flutter-version: '3.27.3'  # Of gebruik 'channel: stable'
 
     - name: Cache Flutter dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.pub-cache
@@ -39,7 +39,7 @@ jobs:
 
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GH_TOKEN }}  # Zorg ervoor dat het geheim 'GH_TOKEN' heet
         publish_dir: ./build/web
