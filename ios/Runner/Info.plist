@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Basisapp configuraties -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>Team Maker2</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>team_maker2</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(FLUTTER_BUILD_NAME)</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>$(FLUTTER_BUILD_NUMBER)</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    
+    <!-- Flutter gebruikt LaunchScreen.storyboard voor de launch screen -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+
+    <!-- App ondersteunt bepaalde oriëntaties -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- Internet toegang voor iOS -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
+    <!-- Notificaties instellingen -->
+    <key>UIUserNotificationUsageDescription</key>
+    <string>Deze app gebruikt meldingen om je op de hoogte te houden van nieuwe sessies en updates.</string>
+
+    <!-- Achtergrond-modus voor meldingen -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+
+    <!-- Deep Linking (moet overeenkomen met AndroidManifest.xml) -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>team_maker2</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Stel iOS-meldingsinstellingen in voor de Flutter Local Notifications plugin -->
+    <key>flutterLocalNotificationsPlugin</key>
+    <dict>
+        <key>ios</key>
+        <dict>
+            <key>default_sound</key>
+            <true/>
+            <key>default_title</key>
+            <string>Team Maker</string>
+            <key>default_body</key>
+            <string>Er is een nieuwe sessie aangemaakt!</string>
+        </dict>
+    </dict>
+
+    <!-- Algemene configuraties en ondersteuning voor push notificaties -->
+    <key>APSEnvironment</key>
+    <string>development</string> 
+    <!-- ⚠️ Verander naar 'production' voor de live versie! -->
+    
+</dict>
+</plist>
