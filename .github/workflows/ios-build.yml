@@ -14,13 +14,13 @@ jobs:
       - name: 📥 Haal de code op
         uses: actions/checkout@v3
 
-      # 2. Installeer Flutter (specificeer de versie expliciet)
-      - name: 🛠️ Installeer Flutter
+      # 2. Installeer een specifieke Flutter-versie
+      - name: 🛠️ Installeer Flutter versie 3.27.3
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'  # Specificeer het stable kanaal
+          flutter-version: '3.27.3'  # Specifieke versie instellen
 
-      # 3. Controleer of Flutter correct is geïnstalleerd
+      # 3. Controleer de geïnstalleerde Flutter-versie
       - name: 🔧 Controleer Flutter versie
         run: flutter --version
 
