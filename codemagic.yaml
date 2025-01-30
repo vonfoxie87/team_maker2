@@ -25,9 +25,10 @@ workflows:
           -configuration Release \
           archive -archivePath build/Runner.xcarchive
 
+          # Exporteren van het .ipa bestand
           xcodebuild -exportArchive \
           -archivePath build/Runner.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
-          -exportPath build
+          -exportPath ios/build
     artifacts:
-      - ios/build/build/Runner.ipa
+      - ios/build/*.ipa  # Het pad naar je .ipa bestand
