@@ -14,27 +14,31 @@ jobs:
       - name: 📥 Haal de code op
         uses: actions/checkout@v3
 
-      # 2. Installeer Flutter
+      # 2. Installeer Flutter (specificeer de versie expliciet)
       - name: 🛠️ Installeer Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: 'stable'  # Specificeer het stable kanaal
 
-      # 3. Installeer dependencies met Flutter
+      # 3. Controleer of Flutter correct is geïnstalleerd
+      - name: 🔧 Controleer Flutter versie
+        run: flutter --version
+
+      # 4. Installeer dependencies met Flutter
       - name: 📦 Installeer dependencies
         run: flutter pub get
 
-      # 4. Installeer CocoaPods voor iOS dependencies
+      # 5. Installeer CocoaPods voor iOS dependencies
       - name: 🔧 Installeer CocoaPods
         run: |
           cd ios
           pod install
 
-      # 5. Bouw de iOS-app zonder code signing
+      # 6. Bouw de iOS-app zonder code signing
       - name: 🏗️ Build iOS zonder codesigning
         run: flutter build ios --no-codesign
 
-      # 6. Archiveer de app met Xcode
+      # 7. Archiveer de app met Xcode
       - name: 📦 Archiveer de app
         run: |
           cd ios
@@ -44,9 +48,9 @@ jobs:
           -configuration Release \
           archive -archivePath build/Runner.xcarchive
 
-      # 7. Upload het iOS build artifact (de .xcarchive)
+      # 8. Upload het iOS build artifact (de .xcarchive)
       - name: 📤 Upload iOS build artifact
-        uses: actions/upload-artifact@v4  # Gebruik versie v4
+        uses: actions/upload-artifact@v4
         with:
           name: iOS-App
           path: ios/build/Runner.xcarchive
