@@ -13,6 +13,11 @@ workflows:
         script: |
           cd ios
           pod install
+      - name: Clean build directory
+        script: |
+          flutter clean
+          cd ios
+          rm -rf build
       - name: Bouw iOS app in Release modus
         script: |
           flutter build ios --release --no-codesign
@@ -25,10 +30,9 @@ workflows:
           -configuration Release \
           archive -archivePath build/Runner.xcarchive
 
-          # Exporteren van het .ipa bestand
           xcodebuild -exportArchive \
           -archivePath build/Runner.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
-          -exportPath ios/build
+          -exportPath build
     artifacts:
-      - ios/build/*.ipa  # Het pad naar je .ipa bestand
+      - ios/build/build/Runner.ipa
