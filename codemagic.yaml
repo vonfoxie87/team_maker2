@@ -1,28 +1,21 @@
 workflows:
   ios-build:
     name: iOS Build
-    max_build_duration: 60  # Maximaal 60 minuten voor een build
+    max_build_duration: 60
     environment:
-      flutter: stable  # Installeer de stabiele Flutter-versie
-      xcode: 15.4  # Specificeer de versie van Xcode voor iOS build
+      flutter: stable
+      xcode: 15.4
     scripts:
-      # Stap 1: Installeer Flutter dependencies
       - name: Installeer Flutter dependencies
         script: |
           flutter pub get
-
-      # Stap 2: Installeer CocoaPods (nodig voor iOS)
       - name: Installeer CocoaPods
         script: |
           cd ios
           pod install
-
-      # Stap 3: Bouw de app in Release modus zonder codesigning
       - name: Bouw iOS app in Release modus
         script: |
           flutter build ios --release --no-codesign
-
-      # Stap 4: Archiveer de app en maak het .ipa bestand
       - name: Archiveer de iOS app en maak een .ipa bestand
         script: |
           cd ios
@@ -36,8 +29,6 @@ workflows:
           -archivePath build/Runner.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
           -exportPath build
-
-      # Stap 5: Upload de .ipa naar de output directory
       - name: Upload .ipa bestand
         archive:
-          path: ios/build/Runner.ipa
+          path: ios/build/build/Runner.ipa
