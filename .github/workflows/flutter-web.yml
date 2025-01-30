@@ -3,36 +3,43 @@ name: Flutter Web Build
 on:
   push:
     branches:
-      - main  # Zorg ervoor dat dit overeenkomt met je hoofdtak (bijv. main of master)
+      - main
   pull_request:
     branches:
-      - main  # Zorg ervoor dat dit overeenkomt met je hoofdtak (bijv. main of master)
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Je kunt ook windows-latest of macos-latest gebruiken
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.27.3'  # Vervang dit door de versie die je gebruikt (of gebruik de laatste stabiele versie)
+        flutter-version: '3.27.3'  # Of gebruik 'channel: stable'
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.pub-cache
+          build
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
 
     - name: Install dependencies
       run: flutter pub get
 
     - name: Build Flutter web app
-      run: flutter build web --release  # Bouw de webversie
+      run: flutter build web --release --web-renderer html --base-href "/team_maker2/"
 
-    - name: Deploy to GitHub Pages (optioneel)
+    - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        git config --global user.name 'GitHub Actions'
-        git config --global user.email 'actions@github.com'
-        git add -f build/web
-        git commit -m 'Deploy web build to GitHub Pages'
-        git push -f https://github.com/${{ github.repository }} HEAD:gh-pages
-
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/web
