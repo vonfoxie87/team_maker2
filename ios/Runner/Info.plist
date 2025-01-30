@@ -94,7 +94,7 @@
 
     <!-- Algemene configuraties en ondersteuning voor push notificaties -->
     <key>APSEnvironment</key>
-    <string>development</string> 
+    <string>production</string> 
     <!-- ⚠️ Verander naar 'production' voor de live versie! -->
     
 </dict>
