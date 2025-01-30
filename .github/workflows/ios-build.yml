@@ -46,7 +46,7 @@ jobs:
 
       # 7. Upload het iOS build artifact (de .xcarchive)
       - name: 📤 Upload iOS build artifact
-        uses: actions/upload-artifact@v3.1  # Let op: Update naar versie v3.1
+        uses: actions/upload-artifact@v2  # Gebruik versie v2, geen v3
         with:
           name: iOS-App
           path: ios/build/Runner.xcarchive
