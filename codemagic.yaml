@@ -29,6 +29,5 @@ workflows:
           -archivePath build/Runner.xcarchive \
           -exportOptionsPlist ExportOptions.plist \
           -exportPath build
-      - name: Upload .ipa bestand
-        archive:
-          path: ios/build/build/Runner.ipa
+    artifacts:
+      - ios/build/build/Runner.ipa
