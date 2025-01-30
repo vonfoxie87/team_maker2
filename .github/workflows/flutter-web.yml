@@ -35,7 +35,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Flutter web app
-      run: flutter build web --release --web-renderer html --base-href "/team_maker2/"
+      run: flutter build web --release --base-href "/team_maker2/"
 
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
