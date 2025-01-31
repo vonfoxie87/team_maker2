@@ -15,10 +15,8 @@ class _SettingsPageState extends State<SettingsPage> {
   int _selectedIndex = 3; // De instellingenpagina is standaard geselecteerd
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _groupNameController = TextEditingController();
 
   final user = Supabase.instance.client.auth.currentUser;
-  List<Map<String, dynamic>> _groups = []; // Lijst voor groepen
 
   @override
   void initState() {
@@ -32,6 +30,58 @@ class _SettingsPageState extends State<SettingsPage> {
 
     // Haal de groepen op bij het laden van de pagina
     _fetchUserGroups();
+  }
+
+  Future<void> _updateProfile() async {
+    try {
+      final newUsername = _usernameController.text.trim();
+      final newEmail = _emailController.text.trim();
+
+      if (newUsername.isEmpty || newEmail.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gebruikersnaam en e-mail mogen niet leeg zijn.')),
+        );
+        return;
+      }
+
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await Supabase.instance.client
+            .from('users') 
+            .update({
+              'username': newUsername,
+              'email': newEmail,
+            })
+            .eq('id', userId);
+
+        // Werk de lokale gebruikersgegevens bij
+        // Bijwerken van de 'currentUser' zonder response
+        await Supabase.instance.client.auth.updateUser(
+          UserAttributes(
+            email: newEmail, // Nieuwe e-mail
+            data: {'username': newUsername}, // Nieuwe gebruikersnaam
+          ),
+        );
+
+        // Werk de UI bij
+        setState(() {
+          _usernameController.text = newUsername;
+          _emailController.text = newEmail;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profiel succesvol bijgewerkt.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fout: Gebruiker niet gevonden.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fout: $e')),
+      );
+    }
   }
 
   void _onItemTapped(int index) {
@@ -275,7 +325,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {}, // Voeg profiel update functionaliteit toe
+                onPressed: _updateProfile, // Voeg profiel update functionaliteit toe
                 child: Text('Bijwerken'),
               ),
               SizedBox(height: 40),

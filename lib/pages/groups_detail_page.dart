@@ -66,7 +66,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             .from('users')
             .select('id, username')
             .eq('id', userId)
-            .single(); // Haal één gebruiker op per userId
+            .single();
 
         if (userResponse != null) {
           users.add(userResponse);
