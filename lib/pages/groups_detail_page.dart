@@ -319,7 +319,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                       }
 
                       return ListTile(
-                        title: Text(username),
+                        title: Text(
+                          username,
+                          style: TextStyle(fontWeight: FontWeight.bold), // Maakt de tekst dikgedrukt
+                        ),
+                        dense: true,
                         subtitle: Text(isAdmin ? 'Beheerder' : 'Gebruiker'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,

@@ -295,6 +295,23 @@ class _GroupsPageState extends State<GroupsPage> {
       ),
     );
   }
+  Future<int> _getMemberCount(String groupId) async {
+    final response = await Supabase.instance.client
+        .from('groups')
+        .select('admins, members')
+        .eq('id', groupId)
+        .single();  // Haal een enkel record op in plaats van een lijst
+
+    if (response != null) {
+      final members = List<String>.from(response['members']);
+      final admins = List<String>.from(response['admins']);
+
+      // Tel het aantal unieke leden (admins + members)
+      final totalMembers = (members.toSet().union(admins.toSet())).length;
+      return totalMembers;
+    }
+    return 0;  // Als er geen data is, geef 0 terug
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -324,32 +341,50 @@ class _GroupsPageState extends State<GroupsPage> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('Geen groepen gevonden.'));
           }
-
-          return ListView.builder(
+          
+          return 
+          ListView.builder(
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               var group = snapshot.data![index];
-              return ListTile(
-                title: Text(group['name']),
-                onTap: () {
-                  final groupId = int.tryParse(group['id'].toString());
-                  if (groupId != null) {
-                    widget.onGroupIdUpdate?.call(groupId);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GroupDetailPage(groupId: groupId),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Ongeldige groep-ID')),
+
+              return FutureBuilder<int>(  // Gebruik FutureBuilder om het aantal leden op te halen
+                future: _getMemberCount(group['id'].toString()),  // Convertie naar string voor database-query
+                builder: (context, countSnapshot) {
+                  if (countSnapshot.connectionState == ConnectionState.waiting) {
+                    return ListTile(
+                      title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Laden...'),  // Toon laadbericht
                     );
                   }
+
+                  if (countSnapshot.hasError) {
+                    return ListTile(
+                      title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Fout bij het ophalen van leden'),  // Toon foutmelding
+                    );
+                  }
+
+                  final groupCount = countSnapshot.data ?? 0;  // Gebruik 0 als er geen data is
+                  return ListTile(
+                    title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('$groupCount leden'),  // Toon het aantal leden
+                    onTap: () {
+                      final groupId = group['id'];  // Hier hoef je niet meer te converteren
+                      widget.onGroupIdUpdate?.call(groupId);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GroupDetailPage(groupId: groupId),
+                        ),
+                      );
+                    },
+                  );
                 },
               );
             },
           );
+
         },
       ),
       floatingActionButton: FloatingActionButton.extended(

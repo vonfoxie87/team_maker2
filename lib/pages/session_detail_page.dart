@@ -47,7 +47,6 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
 
       final allMembers = [..._ownerId, ..._admins];
       final uniqueMembers = allMembers.toSet().toList();
-      print(uniqueMembers);
 
       List<Map<String, dynamic>> users = [];
       for (var userId in uniqueMembers) {
@@ -136,6 +135,20 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
     }
   }
 
+  Future<void> _deleteAttendance(String userId, String status) async {
+    final sessionId = widget.session['id'];
+
+    try {
+      await supabase.from('session_participants').delete().eq('user_id', userId).eq('session_id', sessionId);
+
+      setState(() {
+        _userAttendance[userId] = status;
+      });
+    } catch (error) {
+      print('Fout bij het bijwerken van aanwezigheid: $error');
+    }
+  }
+
   Future<void> _updateSession(Map<String, dynamic> updates) async {
     final sessionId = widget.session['id'];
 
@@ -166,91 +179,94 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
 
     DateTime? selectedDateTime = DateTime.tryParse(widget.session['date'] ?? '');
 
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sessie Aanpassen'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: dateController,
-                  readOnly: true,
-                  decoration: const InputDecoration(labelText: 'Datum en Tijd'),
-                  onTap: () async {
-                    selectedDateTime = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDateTime ?? DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (selectedDateTime != null) {
-                      final time = await showTimePicker(
+    final user = supabase.auth.currentUser;
+    if (_ownerId.contains(user?.id) || _admins.contains(user?.id)) {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Sessie Aanpassen'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: dateController,
+                    readOnly: true,
+                    decoration: const InputDecoration(labelText: 'Datum en Tijd'),
+                    onTap: () async {
+                      selectedDateTime = await showDatePicker(
                         context: context,
-                        initialTime: TimeOfDay.fromDateTime(selectedDateTime!),
+                        initialDate: selectedDateTime ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
                       );
-                      if (time != null) {
-                        selectedDateTime = DateTime(
-                          selectedDateTime!.year,
-                          selectedDateTime!.month,
-                          selectedDateTime!.day,
-                          time.hour,
-                          time.minute,
+                      if (selectedDateTime != null) {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.fromDateTime(selectedDateTime!),
                         );
-                        dateController.text = selectedDateTime!.toIso8601String();
+                        if (time != null) {
+                          selectedDateTime = DateTime(
+                            selectedDateTime!.year,
+                            selectedDateTime!.month,
+                            selectedDateTime!.day,
+                            time.hour,
+                            time.minute,
+                          );
+                          dateController.text = selectedDateTime!.toIso8601String();
+                        }
                       }
-                    }
-                  },
-                ),
-                TextField(
-                  controller: durationController,
-                  decoration: const InputDecoration(labelText: 'Duur (minuten)'),
-                  keyboardType: TextInputType.text,
-                ),
-                TextField(
-                  controller: maxParticipantsController,
-                  decoration: const InputDecoration(labelText: 'Max deelnemers'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: locationController,
-                  decoration: const InputDecoration(labelText: 'Locatie'),
-                ),
-              ],
+                    },
+                  ),
+                  TextField(
+                    controller: durationController,
+                    decoration: const InputDecoration(labelText: 'Duur (minuten)'),
+                    keyboardType: TextInputType.text,
+                  ),
+                  TextField(
+                    controller: maxParticipantsController,
+                    decoration: const InputDecoration(labelText: 'Max deelnemers'),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: locationController,
+                    decoration: const InputDecoration(labelText: 'Locatie'),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuleren'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _updateSession({
-                  'group_id': groupIdController.text,
-                  'date': selectedDateTime?.toIso8601String(),
-                  'duration':durationController.text,
-                  'max_participants': int.tryParse(maxParticipantsController.text),
-                  'location': locationController.text,
-                });
-                Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SessionsPage(groupId: null),
-                      ),
-                    );
-                // Navigator.of(context).pop();
-              },
-              child: const Text('Opslaan'),
-            ),
-          ],
-        );
-      },
-    );
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Annuleren'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await _updateSession({
+                    'group_id': groupIdController.text,
+                    'date': selectedDateTime?.toIso8601String(),
+                    'duration':durationController.text,
+                    'max_participants': int.tryParse(maxParticipantsController.text),
+                    'location': locationController.text,
+                  });
+                  Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SessionsPage(groupId: null),
+                        ),
+                      );
+                  // Navigator.of(context).pop();
+                },
+                child: const Text('Opslaan'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -282,6 +298,8 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
 
                 return ListTile(
                   title: Text(username),
+                  dense: true,
+                  //visualDensity: VisualDensity(vertical: -4),
                   subtitle: Text('Status: $attendance'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -295,7 +313,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () => _updateAttendance(userId, 'afwezig'),
+                        onPressed: () => _deleteAttendance(userId, 'afwezig'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: attendance == 'afwezig' ? Colors.red : Colors.white,
                         ),
