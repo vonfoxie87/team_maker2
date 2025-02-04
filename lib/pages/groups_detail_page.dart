@@ -334,24 +334,28 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                   _updateUserRole(userId, !isAdmin);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isAdmin == true ? Colors.green : Colors.white, // Rood als 'afwezig'
+                                  backgroundColor: isAdmin == true ? const Color.fromARGB(255, 190, 175, 41) : const Color.fromARGB(255, 53, 163, 25),
                                   foregroundColor: Colors.black,
-                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                  minimumSize: Size(30, 30),
                                 ),
                                 child: Text(
                                           isAdmin ? 'Maak gebruiker' : 'Maak beheerder',
-                                          ),
+                                          style: TextStyle(fontSize: 12)),
                               ),
-                             ElevatedButton(
+                            Text("  "),
+                            ElevatedButton(
                                 onPressed: () {
                                   _removeUserFromGroup(userId);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:  Colors.white, // Rood als 'afwezig'
-                                  foregroundColor: Colors.black,
-                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                  backgroundColor:  const Color.fromARGB(255, 151, 10, 10),
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                  minimumSize: Size(30, 30),
                                 ),
-                                child: Text('Verwijder'),
+                                child: Text('Verwijder',
+                                style: TextStyle(fontSize: 12)),
                               ),
                           ],
                           ],

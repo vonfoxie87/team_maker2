@@ -272,20 +272,44 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
   @override
   Widget build(BuildContext context) {
     final user = supabase.auth.currentUser;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Sessie Details'),
         automaticallyImplyLeading: false,
+        
         actions: [
-          if (_ownerId.contains(user?.id) || _admins.contains(user?.id))
+          if (_admins.contains(user?.id ?? ''))
             TextButton.icon(
-              onPressed: _deleteSession,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Bevestig verwijdering'),
+                      content: Text('Weet je zeker dat je deze sessie wilt verwijderen?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(), // Sluit de popup
+                          child: Text('Annuleren'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Sluit de popup
+                            _deleteSession(); // Voer de verwijderactie uit
+                          },
+                          child: Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
               icon: const Icon(Icons.delete),
               label: const Text('Verwijder sessie'),
             ),
         ],
       ),
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -297,7 +321,9 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                 final attendance = _userAttendance[userId] ?? 'afwezig';
 
                 return ListTile(
-                  title: Text(username),
+                  title: Text(
+                    username,
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                   dense: true,
                   //visualDensity: VisualDensity(vertical: -4),
                   subtitle: Text('Status: $attendance'),
@@ -308,16 +334,28 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                         onPressed: () => _updateAttendance(userId, 'aanwezig'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: attendance == 'aanwezig' ? Colors.green : Colors.white,
+                          foregroundColor: attendance == 'aanwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
                         ),
-                        child: const Text('Aanwezig'),
+                        child: const Text(
+                          'Aanwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () => _deleteAttendance(userId, 'afwezig'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: attendance == 'afwezig' ? Colors.red : Colors.white,
+                          foregroundColor: attendance == 'afwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
                         ),
-                        child: const Text('Afwezig'),
+                        child: const Text(
+                          'Afwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                     ],
                   ),
