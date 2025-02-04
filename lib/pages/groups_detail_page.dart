@@ -91,7 +91,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   // Genereer een uitnodigingscode
   Future<String> _generateInvitationCode() async {
     final rand = Random();
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrs';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrsuvwxzy';
     String code = '';
     for (int i = 0; i < 16; i++) {
       code += characters[rand.nextInt(characters.length)];
@@ -266,106 +266,123 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   Widget build(BuildContext context) {
     final user = supabase.auth.currentUser; // Huidige gebruiker
     return Scaffold(
-      appBar: AppBar(title: Text('Group Details'), automaticallyImplyLeading: false),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // Uitnodigingscode weergeven
-                ListTile(
-                  title: Text('Uitnodigingscode: ${invitationCode ?? 'Geen code gegenereerd'}'),
-                  //subtitle: Text('Gebruik deze code om mensen uit te nodigen voor deze groep.'),
-                  trailing: 
-                
-
-                ElevatedButton(
-                  onPressed: () async {
-                    if (invitationCode == null || invitationCode.isEmpty) {
-                      // Genereer de uitnodigingscode als er nog geen is
-                      final code = await _generateInvitationCode();
-                      await _saveInvitationCode(widget.groupId, code);
-                      setState(() {
-                        invitationCode = code;
-                      });
-                    } else {
-                      // Kopieer de code naar het klembord
-                      await Clipboard.setData(ClipboardData(text: invitationCode));
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Uitnodigingscode gekopieerd naar het klembord!')),
-                          );
-                        }
-                    }
-                  },
-                  child: Text(invitationCode.isEmpty ? 'Genereer uitnodigingscode' : 'Kopieer'),
-                  ),
-                ),
-                // Lijst van groepsleden
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _groupUsers.length,
-                    itemBuilder: (context, index) {
-                      final user = _groupUsers[index];
-                      final userId = user['id'];
-                      final username = user['username'];
-
-                      bool isAdmin = admins.contains(userId);  // Controleer of de gebruiker een admin is
-                      bool isCurrentUser = userId == supabase.auth.currentUser?.id;
-                      bool isCurrentUserAdmin = false;
-
-                      // Controleer of de huidige gebruiker een admin is
-                      if (supabase.auth.currentUser != null) {
-                        isCurrentUserAdmin = admins.contains(supabase.auth.currentUser!.id);
-                      }
-
-                      return ListTile(
-                        title: Text(
-                          username,
-                          style: TextStyle(fontWeight: FontWeight.bold), // Maakt de tekst dikgedrukt
-                        ),
-                        dense: true,
-                        subtitle: Text(isAdmin ? 'Beheerder' : 'Gebruiker'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (isCurrentUserAdmin) ...[
-                              ElevatedButton(
-                                onPressed: () {
-                                  _updateUserRole(userId, !isAdmin);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isAdmin == true ? const Color.fromARGB(255, 190, 175, 41) : const Color.fromARGB(255, 53, 163, 25),
-                                  foregroundColor: Colors.black,
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  minimumSize: Size(30, 30),
-                                ),
-                                child: Text(
-                                          isAdmin ? 'Maak gebruiker' : 'Maak beheerder',
-                                          style: TextStyle(fontSize: 12)),
-                              ),
-                            Text("  "),
-                            ElevatedButton(
-                                onPressed: () {
-                                  _removeUserFromGroup(userId);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:  const Color.fromARGB(255, 151, 10, 10),
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  minimumSize: Size(30, 30),
-                                ),
-                                child: Text('Verwijder',
-                                style: TextStyle(fontSize: 12)),
-                              ),
-                          ],
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+      appBar: AppBar(
+        title: Text('Group Details'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Stack(
+        children: [
+          Opacity(
+            opacity: 0.05, // Stel de opaciteit in op 50%
+            child: Image.asset(
+              'assets/Icon-512.png',
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      // Uitnodigingscode weergeven
+                      ListTile(
+                        title: Text('Uitnodigingscode: ${invitationCode ?? 'Geen code gegenereerd'}'),
+                        trailing: ElevatedButton(
+                          onPressed: () async {
+                            if (invitationCode == null || invitationCode.isEmpty) {
+                              // Genereer de uitnodigingscode als er nog geen is
+                              final code = await _generateInvitationCode();
+                              await _saveInvitationCode(widget.groupId, code);
+                              setState(() {
+                                invitationCode = code;
+                              });
+                            } else {
+                              // Kopieer de code naar het klembord
+                              await Clipboard.setData(ClipboardData(text: invitationCode));
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Uitnodigingscode gekopieerd naar het klembord!')),
+                                );
+                              }
+                            }
+                          },
+                          child: Text(invitationCode.isEmpty ? 'Genereer uitnodigingscode' : 'Kopieer'),
+                        ),
+                      ),
+                      // Lijst van groepsleden
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _groupUsers.length,
+                          itemBuilder: (context, index) {
+                            final user = _groupUsers[index];
+                            final userId = user['id'];
+                            final username = user['username'];
+
+                            bool isAdmin = admins.contains(userId);  // Controleer of de gebruiker een admin is
+                            bool isCurrentUser = userId == supabase.auth.currentUser?.id;
+                            bool isCurrentUserAdmin = false;
+
+                            // Controleer of de huidige gebruiker een admin is
+                            if (supabase.auth.currentUser != null) {
+                              isCurrentUserAdmin = admins.contains(supabase.auth.currentUser!.id);
+                            }
+
+                            return ListTile(
+                              title: Text(
+                                username,
+                                style: TextStyle(fontWeight: FontWeight.bold), // Maakt de tekst dikgedrukt
+                              ),
+                              dense: true,
+                              subtitle: Text(isAdmin ? 'Beheerder' : 'Gebruiker'),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isCurrentUserAdmin) ...[
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _updateUserRole(userId, !isAdmin);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isAdmin == true
+                                            ? const Color.fromARGB(255, 190, 175, 41)
+                                            : const Color.fromARGB(255, 53, 163, 25),
+                                        foregroundColor: Colors.black,
+                                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        minimumSize: Size(30, 30),
+                                      ),
+                                      child: Text(
+                                        isAdmin ? 'Maak gebruiker' : 'Maak beheerder',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                    Text("  "),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _removeUserFromGroup(userId);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(255, 151, 10, 10),
+                                        foregroundColor: Colors.white,
+                                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        minimumSize: Size(30, 30),
+                                      ),
+                                      child: Text('Verwijder', style: TextStyle(fontSize: 12)),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           if (user == null)

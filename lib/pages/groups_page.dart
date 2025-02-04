@@ -319,74 +319,127 @@ class _GroupsPageState extends State<GroupsPage> {
     final user = supabase.auth.currentUser;
 
     return Scaffold(
-    appBar: AppBar(
-      title: Text('Groepen'), automaticallyImplyLeading: false,
-      actions: [
-        TextButton.icon(
-          onPressed: _showCreateGroupDialog,
-          icon: Icon(Icons.add),
-          label: Text('Nieuwe groep'),
-        )
-      ],
-    ),
-
-
-      body: FutureBuilder<List<Map<String, dynamic>>>( 
-        future: _groupsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Fout bij het ophalen van gegevens'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Geen groepen gevonden.'));
-          }
-          
-          return 
-          ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              var group = snapshot.data![index];
-
-              return FutureBuilder<int>(  // Gebruik FutureBuilder om het aantal leden op te halen
-                future: _getMemberCount(group['id'].toString()),  // Convertie naar string voor database-query
-                builder: (context, countSnapshot) {
-                  if (countSnapshot.connectionState == ConnectionState.waiting) {
-                    return ListTile(
-                      title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('Laden...'),  // Toon laadbericht
-                    );
-                  }
-
-                  if (countSnapshot.hasError) {
-                    return ListTile(
-                      title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('Fout bij het ophalen van leden'),  // Toon foutmelding
-                    );
-                  }
-
-                  final groupCount = countSnapshot.data ?? 0;  // Gebruik 0 als er geen data is
-                  return ListTile(
-                    title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('$groupCount leden'),  // Toon het aantal leden
-                    onTap: () {
-                      final groupId = group['id'];  // Hier hoef je niet meer te converteren
-                      widget.onGroupIdUpdate?.call(groupId);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GroupDetailPage(groupId: groupId),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-
-        },
+      appBar: AppBar(
+        title: Text('Groepen'),
+        automaticallyImplyLeading: false,
+        actions: [
+          TextButton.icon(
+            onPressed: _showCreateGroupDialog,
+            icon: Icon(Icons.add),
+            label: Text('Nieuwe groep'),
+          )
+        ],
       ),
+      body: Stack(
+        children: [
+          Opacity(
+            opacity: 0.05, // Stel de opaciteit in op 50%
+            child: Image.asset(
+              'assets/Icon-512.png',
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FutureBuilder<List<Map<String, dynamic>>>( // Haal de groepen op
+              future: _groupsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Fout bij het ophalen van gegevens'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('Geen groepen gevonden.'));
+                }
+
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    var group = snapshot.data![index];
+
+                    return FutureBuilder<int>(  // Gebruik FutureBuilder om het aantal leden op te halen
+                      future: _getMemberCount(group['id'].toString()),  // Convertie naar string voor database-query
+                      builder: (context, countSnapshot) {
+                        if (countSnapshot.connectionState == ConnectionState.waiting) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.transparent,
+                                width: 5.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            margin: EdgeInsets.symmetric(vertical: 2.5),
+                            child: ListTile(
+                              title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text('Laden...'),  // Toon laadbericht
+                              tileColor: Colors.grey[200],
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                              isThreeLine: true,
+                            ),
+                          );
+                        }
+
+                        if (countSnapshot.hasError) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.transparent,
+                                width: 5.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            margin: EdgeInsets.symmetric(vertical: 2.5),
+                            child: ListTile(
+                              title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text('Fout bij het ophalen van leden'),  // Toon foutmelding
+                              tileColor: Colors.grey[200],
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                              isThreeLine: true,
+                            ),
+                          );
+                        }
+
+                        final groupCount = countSnapshot.data ?? 0;  // Gebruik 0 als er geen data is
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.transparent,
+                              width: 5.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          margin: EdgeInsets.symmetric(vertical: 2.5),
+                          child: ListTile(
+                            title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text('$groupCount leden'),  // Toon het aantal leden
+                            tileColor: Colors.grey[200],
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                            isThreeLine: true,
+                            onTap: () {
+                              final groupId = group['id'];  // Hier hoef je niet meer te converteren
+                              widget.onGroupIdUpdate?.call(groupId);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GroupDetailPage(groupId: groupId),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showJoinGroupDialog,
         label: Text('Uitnodigingscode'),

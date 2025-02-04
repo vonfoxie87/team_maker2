@@ -290,94 +290,109 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Instellingen'),
-        actions: [
-          TextButton.icon(
-            onPressed: () {
-              _logout(context);
-            },
-            icon: Icon(Icons.logout),
-            label: Text('Uitloggen'),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Profiel',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Gebruikersnaam'),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'E-mail'),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _updateProfile, // Voeg profiel update functionaliteit toe
-                child: Text('Bijwerken'),
-              ),
-              SizedBox(height: 40),
-              Text(
-                'Jouw Groepen',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: _fetchUserGroups(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Fout bij het ophalen van gegevens'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('Je hebt geen groepen.'));
-                  }
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      var group = snapshot.data![index];
-                      return ListTile(
-                        title: Text(group['name']),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                _editGroupName(context, group['id'], group['name']);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _confirmDeleteGroup(context, group['id'], group['name']);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Instellingen'),
+      actions: [
+        TextButton.icon(
+          onPressed: () {
+            _logout(context);
+          },
+          icon: Icon(Icons.logout),
+          label: Text('Uitloggen'),
+        ),
+      ],
+    ),
+    body: Stack(
+      children: [
+        // Achtergrondafbeelding
+        Opacity(
+          opacity: 0.05, // Stel de opaciteit in op 50%
+          child: Image.asset(
+            'assets/Icon-512.png',
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            fit: BoxFit.cover,
           ),
         ),
-      ),
+        // Hoofdinhoud boven de afbeelding
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Profiel',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(labelText: 'Gebruikersnaam'),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'E-mail'),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _updateProfile, // Voeg profiel update functionaliteit toe
+                  child: Text('Bijwerken'),
+                ),
+                SizedBox(height: 40),
+                Text(
+                  'Jouw Groepen',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                FutureBuilder<List<Map<String, dynamic>>>( 
+                  future: _fetchUserGroups(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Fout bij het ophalen van gegevens'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(child: Text('Je hebt geen groepen.'));
+                    }
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        var group = snapshot.data![index];
+                        return ListTile(
+                          title: Text(group['name']),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  _editGroupName(context, group['id'], group['name']);
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  _confirmDeleteGroup(context, group['id'], group['name']);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           if (user == null)

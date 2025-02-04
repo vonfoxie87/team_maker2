@@ -185,110 +185,123 @@ class _NewSessiePageState extends State<NewSessiePage> {
       appBar: AppBar(
         title: Text('Nieuwe Sessie'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Dropdown voor het kiezen van de groep
-              DropdownButtonFormField<int>(
-                value: _selectedGroupId,
-                decoration: InputDecoration(labelText: 'Kies een Groep'),
-                items: _groups.map((group) {
-                  return DropdownMenuItem<int>(
-                    value: group['id'],
-                    child: Text(group['name'] ?? 'Groep zonder naam'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedGroupId = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Kies een groep';
-                  }
-                  return null;
-                },
-              ),
-              // Datumveld voor het kiezen van de datum
-              TextFormField(
-                controller: TextEditingController(
-                  text: DateFormat('d MMMM yyyy', 'nl_NL').format(_selectedDate),
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Datum',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context), // Datumpicker aanroepen
-                  ),
-                ),
-                readOnly: true, // Zorgt ervoor dat het veld alleen-lezen is
-              ),
-              // Tijdveld voor het kiezen van de tijd
-              TextFormField(
-                controller: TextEditingController(
-                  text: _selectedTime.format(context), // Zet de geselecteerde tijd in het veld
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Tijd',
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.access_time),
-                    onPressed: () => _selectTime(context), // TimePicker aanroepen
-                  ),
-                ),
-                readOnly: true, // Zorgt ervoor dat het veld alleen-lezen is
-              ),
-              TextFormField(
-                initialValue: _duration,
-                decoration: InputDecoration(labelText: 'Duur'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vul de duur van de sessie in';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _duration = value!;
-                },
-              ),
-              TextFormField(
-                initialValue: _location,
-                decoration: InputDecoration(labelText: 'Locatie'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vul de locatie in';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _location = value!;
-                },
-              ),
-              TextFormField(
-                initialValue: _maxParticipants.toString(),
-                decoration: InputDecoration(labelText: 'Max deelnemers'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vul het aantal deelnemers in';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _maxParticipants = int.parse(value!);
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _createSessie,
-                child: Text('Sessie Aanmaken'),
-              ),
-            ],
+      body: Stack(
+        children: [
+          Opacity(
+            opacity: 0.05, // Stel de opaciteit in op 50%
+            child: Image.asset(
+              'assets/Icon-512.png',
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Dropdown voor het kiezen van de groep
+                  DropdownButtonFormField<int>(
+                    value: _selectedGroupId,
+                    decoration: InputDecoration(labelText: 'Kies een Groep'),
+                    items: _groups.map((group) {
+                      return DropdownMenuItem<int>(
+                        value: group['id'],
+                        child: Text(group['name'] ?? 'Groep zonder naam'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGroupId = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Kies een groep';
+                      }
+                      return null;
+                    },
+                  ),
+                  // Datumveld voor het kiezen van de datum
+                  TextFormField(
+                    controller: TextEditingController(
+                      text: DateFormat('d MMMM yyyy', 'nl_NL').format(_selectedDate),
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Datum',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.calendar_today),
+                        onPressed: () => _selectDate(context), // Datumpicker aanroepen
+                      ),
+                    ),
+                    readOnly: true, // Zorgt ervoor dat het veld alleen-lezen is
+                  ),
+                  // Tijdveld voor het kiezen van de tijd
+                  TextFormField(
+                    controller: TextEditingController(
+                      text: _selectedTime.format(context), // Zet de geselecteerde tijd in het veld
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Tijd',
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.access_time),
+                        onPressed: () => _selectTime(context), // TimePicker aanroepen
+                      ),
+                    ),
+                    readOnly: true, // Zorgt ervoor dat het veld alleen-lezen is
+                  ),
+                  TextFormField(
+                    initialValue: _duration,
+                    decoration: InputDecoration(labelText: 'Duur'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vul de duur van de sessie in';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _duration = value!;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: _location,
+                    decoration: InputDecoration(labelText: 'Locatie'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vul de locatie in';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _location = value!;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: _maxParticipants.toString(),
+                    decoration: InputDecoration(labelText: 'Max deelnemers'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vul het aantal deelnemers in';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _maxParticipants = int.parse(value!);
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _createSessie,
+                    child: Text('Sessie Aanmaken'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

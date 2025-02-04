@@ -177,7 +177,19 @@ class _SessionsPageState extends State<SessionsPage> {
               ),
             ],
           ),
-      body: Column(
+      body: Stack(
+      children: [
+        // Achtergrondafbeelding
+        Opacity(
+          opacity: 0.05, // Stel de opaciteit in op 50%
+          child: Image.asset(
+            'assets/Icon-512.png',
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Column(
         children: [
           Expanded(
             child: _sessions.isEmpty
@@ -186,17 +198,15 @@ class _SessionsPageState extends State<SessionsPage> {
                     itemCount: _sessions.length,
                     itemBuilder: (context, index) {
                       final session = _sessions[index];
-                      final groupName = session['group_name']; // Groepsnaam ophalen uit de sessie
+                      final groupName = session['group_name'];
                       final attendingCount = session['participants']?.where((participant) => participant['status'] == 'aanwezig').length ?? 0;
-
-                      // Controleer of de huidige gebruiker aanwezig is
                       final isUserPresent = session['participants']?.any((participant) => participant['user_id'] == user?.id && participant['status'] == 'aanwezig') ?? false;
 
                       return Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.white, // Kleur van de rand
-                            width: 2.0, // Dikte van de rand
+                            color: Colors.transparent,
+                            width: 5.0,
                           ),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
@@ -207,30 +217,29 @@ class _SessionsPageState extends State<SessionsPage> {
                             'Duur: ${session['duration']}\nLocatie: ${session['location']}\nAanwezig: $attendingCount\nJij bent: ${isUserPresent ? 'Aanwezig' : 'Afwezig'}'
                           ),
                           trailing: Text('$groupName', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
-                          tileColor: Colors.grey[200], // Achtergrondkleur van de ListTile
+                          tileColor: Colors.grey[200],
                           contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                           isThreeLine: true,
                           onTap: () async {
-                            // Navigeer naar een nieuw scherm voor het bijwerken van aanwezigheid
                             bool? isPresent = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SessionDetailPage(session: session),
                               ),
                             );
-                            // Bij terugkeren naar deze pagina kun je de sessies opnieuw ophalen om de bijgewerkte status te zien.
                             if (isPresent != null) {
-                              // Herlaad de sessies of werk alleen de status bij
                               await _fetchSessions();
                             }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ],
+    ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           if (user == null)

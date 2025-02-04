@@ -109,51 +109,66 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Registratie')),
-      body: Column(
+      appBar: AppBar(
+        title: const Text('Registratie'),
+      ),
+      body: Stack(
         children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-              children: [
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                ),
-                const SizedBox(height: 18),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Wachtwoord'),
-                ),
-                const SizedBox(height: 18),
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(labelText: 'Gebruikersnaam'),
-                ),
-                const SizedBox(height: 18),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _signUp,
-                  child: Text(_isLoading ? 'Registreren...' : 'Registreren'),
-                ),
-              ],
+          Opacity(
+            opacity: 0.05, // Stel de opaciteit in op 50%
+            child: Image.asset(
+              'assets/Icon-512.png',
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
             ),
           ),
-          // Adding a login link at the bottom
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                },
-                child: const Text('Al een account? Log hier in'),
+          Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                    ),
+                    const SizedBox(height: 18),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'Wachtwoord'),
+                    ),
+                    const SizedBox(height: 18),
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(labelText: 'Gebruikersnaam'),
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _signUp,
+                      child: Text(_isLoading ? 'Registreren...' : 'Registreren'),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              // Toevoegen van een login link onderaan
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                      );
+                    },
+                    child: const Text('Al een account? Log hier in'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
