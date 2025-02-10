@@ -342,7 +342,7 @@ class _GroupsPageState extends State<GroupsPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(bottom: 16.0),
             child: FutureBuilder<List<Map<String, dynamic>>>( // Haal de groepen op
               future: _groupsFuture,
               builder: (context, snapshot) {

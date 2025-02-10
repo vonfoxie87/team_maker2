@@ -282,7 +282,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(bottom: 16.0),
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : Column(

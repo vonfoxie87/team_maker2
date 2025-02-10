@@ -44,7 +44,6 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
         _ownerId = List<String>.from(groupResponse['members']);
         _admins = List<String>.from(groupResponse['admins']);
       });
-
       final allMembers = [..._ownerId, ..._admins];
       final uniqueMembers = allMembers.toSet().toList();
 
@@ -309,7 +308,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
             ),
         ],
       ),
-
+      
       body: Stack(
       children: [
         // Achtergrondafbeelding
@@ -329,48 +328,107 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
           ListView.builder(
             itemCount: _groupUsers.length,
             itemBuilder: (context, index) {
+              _groupUsers.sort((a, b) {
+                final user_auth = supabase.auth.currentUser;
+                final userId = user_auth?.id ?? '';
+                if (a['id'] == userId) {
+                  return -1;
+                } else if (b['id'] == userId) {
+                  return 1;
+                }
+
+                final attendanceA = _userAttendance[a['id']] ?? 'afwezig';
+                final attendanceB = _userAttendance[b['id']] ?? 'afwezig';
+                if (attendanceA == 'aanwezig' && attendanceB == 'afwezig') {
+                  return -1;
+                } else if (attendanceA == 'afwezig' && attendanceB == 'aanwezig') {
+                  return 1;
+                }
+                return 0;
+              });
+
               final user = _groupUsers[index];
               final userId = user['id'];
               final username = user['username'];
               final attendance = _userAttendance[userId] ?? 'afwezig';
-
+              final user_auth = supabase.auth.currentUser;
+              Color statusColor = attendance == 'aanwezig' ? Colors.green : Colors.red;
               return ListTile(
                 title: Text(
                   username,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 dense: true,
-                subtitle: Text('Status: $attendance'),
+                subtitle: Text(
+                  attendance,
+                  style: TextStyle(
+                    color: statusColor,  // Kleur afhankelijk van de status
+                    fontWeight: FontWeight.bold,  // Zet de tekst vetgedrukt
+                  ),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ElevatedButton(
-                      onPressed: () => _updateAttendance(userId, 'aanwezig'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: attendance == 'aanwezig' ? Colors.green : Colors.white,
-                        foregroundColor: attendance == 'aanwezig' ? Colors.white : Colors.black,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        minimumSize: Size(30, 30),
+                    if (_admins.contains(user_auth?.id ?? ''))
+                      ElevatedButton(
+                        onPressed: () => _updateAttendance(userId, 'aanwezig'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: attendance == 'aanwezig' ? Colors.green : Colors.white,
+                          foregroundColor: attendance == 'aanwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
+                        ),
+                        child: const Text(
+                          'Aanwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
-                      child: const Text(
-                        'Aanwezig',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
                     const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () => _deleteAttendance(userId, 'afwezig'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: attendance == 'afwezig' ? Colors.red : Colors.white,
-                        foregroundColor: attendance == 'afwezig' ? Colors.white : Colors.black,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        minimumSize: Size(30, 30),
+                    if (_admins.contains(user_auth?.id ?? ''))
+                      ElevatedButton(
+                        onPressed: () => _deleteAttendance(userId, 'afwezig'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: attendance == 'afwezig' ? Colors.red : Colors.white,
+                          foregroundColor: attendance == 'afwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
+                        ),
+                        child: const Text(
+                          'Afwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
-                      child: const Text(
-                        'Afwezig',
-                        style: TextStyle(fontSize: 12),
+
+                    // Als de gebruiker geen beheerder is, kan hij/zij alleen zijn/haar eigen status wijzigen
+                    if (!_admins.contains(user_auth?.id ?? '') && user_auth?.id == userId)
+                      ElevatedButton(
+                        onPressed: () => _updateAttendance(userId, 'aanwezig'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: attendance == 'aanwezig' ? Colors.green : Colors.white,
+                          foregroundColor: attendance == 'aanwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
+                        ),
+                        child: const Text(
+                          'Aanwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
-                    ),
+                    const SizedBox(width: 8),
+                    if (!_admins.contains(user_auth?.id ?? '') && user_auth?.id == userId)
+                      ElevatedButton(
+                        onPressed: () => _deleteAttendance(userId, 'afwezig'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: attendance == 'afwezig' ? Colors.red : Colors.white,
+                          foregroundColor: attendance == 'afwezig' ? Colors.white : Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          minimumSize: Size(30, 30),
+                        ),
+                        child: const Text(
+                          'Afwezig',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
                   ],
                 ),
               );
