@@ -10,8 +10,8 @@ Future<void> main() async {
 
   try {
     await Supabase.initialize(
-      url: 'https://hwptvjnzhqzzbdtaixqb.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3cHR2am56aHF6emJkdGFpeHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzczODI3NTMsImV4cCI6MjA1Mjk1ODc1M30.OgUXWuYSq1UyfD_FrioQjF1Dpd6kE2cZokrOIriZkQQ',
+      url: '${{ secrets.SB_URL }}',
+      anonKey: '${{ secrets.SB_KEY }}',
     );
     runApp(const MyApp());
   } catch (e) {
