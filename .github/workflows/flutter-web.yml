@@ -34,8 +34,8 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Build Flutter web app
-      run: flutter build web --release
+    - name: Build Flutter web app met secrets
+      run: flutter build web --release --dart-define=SB_URL=${{ secrets.SB_URL }} --dart-define=SB_KEY=${{ secrets.SB_KEY }}
 
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'

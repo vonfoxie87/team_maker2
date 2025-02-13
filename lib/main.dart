@@ -8,14 +8,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  const String sbUrl = String.fromEnvironment('SB_URL', defaultValue: '');
+  const String sbKey = String.fromEnvironment('SB_KEY', defaultValue: '');
+
+  if (sbUrl.isEmpty || sbKey.isEmpty) {
+    debugPrint('❌ Supabase URL of Key ontbreekt! Controleer je dart-define instellingen.');
+    return;
+  }
+
   try {
     await Supabase.initialize(
-      url: 'https://hwptvjnzhqzzbdtaixqb.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3cHR2am56aHF6emJkdGFpeHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzczODI3NTMsImV4cCI6MjA1Mjk1ODc1M30.OgUXWuYSq1UyfD_FrioQjF1Dpd6kE2cZokrOIriZkQQ',
+      url: sbUrl,
+      anonKey: sbKey,
     );
     runApp(const MyApp());
   } catch (e) {
-    debugPrint('Fout bij Supabase-initialisatie: $e');
+    debugPrint('❌ Fout bij Supabase-initialisatie: $e');
   }
 }
 
@@ -37,16 +45,6 @@ class _MyAppState extends State<MyApp> {
     // Initialiseer notificaties
     final AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final InitializationSettings initializationSettings = InitializationSettings(
-      android: androidInitializationSettings,
-    );
-
-    // Hier stel je de notificaties in zonder de onSelectNotification
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-    // Toon een testmelding als de app start
-    showSessionStartedNotification();
   }
 
   // Functie om een melding te tonen
