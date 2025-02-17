@@ -8,7 +8,8 @@ import 'package:team_maker2/pages/sessions_page.dart';
 final supabase = Supabase.instance.client;
 
 class NewSessiePage extends StatefulWidget {
-  const NewSessiePage({super.key});
+  final VoidCallback toggleTheme;
+  const NewSessiePage({super.key, required this.toggleTheme});
 
   @override
   _NewSessiePageState createState() => _NewSessiePageState();
@@ -106,7 +107,7 @@ class _NewSessiePageState extends State<NewSessiePage> {
           Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SessionsPage(groupId: null),
+                        builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme),
                       ),
                     );
         }

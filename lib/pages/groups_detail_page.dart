@@ -11,8 +11,8 @@ final supabase = Supabase.instance.client;
 
 class GroupDetailPage extends StatefulWidget {
   final int groupId; // Groep-ID als int
-
-  const GroupDetailPage({super.key, required this.groupId});
+  final VoidCallback toggleTheme;
+  const GroupDetailPage({super.key, required this.groupId, required this.toggleTheme});
 
   @override
   _GroupDetailPageState createState() => _GroupDetailPageState();
@@ -21,7 +21,7 @@ class GroupDetailPage extends StatefulWidget {
 class _GroupDetailPageState extends State<GroupDetailPage> {
   List<Map<String, dynamic>> _groupUsers = [];
   bool _isLoading = true;
-  int _selectedIndex = 0; // Voor navigatie van de BottomNavigationBar
+  int _selectedIndex = 1; // Voor navigatie van de BottomNavigationBar
   List<String> admins = []; // Lijst van admin-IDs
   String invitationCode = ''; // Uitnodigingscode voor de groep
 
@@ -177,7 +177,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => GroupDetailPage(groupId: groupId),
+              builder: (context) => GroupDetailPage(groupId: groupId, toggleTheme: widget.toggleTheme),
               ),
             );
       // _fetchGroupUsers();
@@ -212,7 +212,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => GroupDetailPage(groupId: groupId),
+                        builder: (context) => GroupDetailPage(groupId: groupId, toggleTheme: widget.toggleTheme),
                       ),
                     );
         _fetchGroupUsers();
@@ -232,28 +232,28 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
       case 0:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 1:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 2:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
+          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 3:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
+          MaterialPageRoute(builder: (context) => SettingsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
@@ -392,8 +392,10 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             )
           else
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: user.userMetadata?['username'] ?? 'Profiel',
+              icon: Icon(Icons.brightness_6),
+              label: Theme.of(context).brightness == Brightness.dark
+                ? 'Licht'
+                : 'Donker',
             ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.group),
@@ -410,9 +412,20 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[500]
+          : Colors.grey[900],
         type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
+        onTap: (index) {
+        if (index == 0) {
+          if (user == null) {
+          } else {
+            widget.toggleTheme();
+          }
+        } else {
+          _onItemTapped(index);
+        }
+        }
       ),
     );
   }

@@ -5,7 +5,8 @@ import 'package:team_maker2/pages/groups_page.dart';
 import 'package:team_maker2/pages/login_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  final VoidCallback toggleTheme;
+  const RegisterPage({super.key, required this.toggleTheme});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -34,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
           _redirecting = true;
           if (mounted) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const GroupsPage()),
+              MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
             );
           }
         }
@@ -88,9 +89,9 @@ class _RegisterPageState extends State<RegisterPage> {
           );
           _redirecting = true;
           Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPage(toggleTheme: widget.toggleTheme)),
+                      );
         }
       } else {
         throw Exception('Registratie mislukt');
@@ -161,7 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        MaterialPageRoute(builder: (context) => LoginPage(toggleTheme: widget.toggleTheme)),
                       );
                     },
                     child: const Text('Al een account? Log hier in'),

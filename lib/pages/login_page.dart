@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:team_maker2/pages/sessions_page.dart';
 import 'package:team_maker2/pages/registration_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final VoidCallback toggleTheme;
+
+  const LoginPage({super.key, required this.toggleTheme});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -17,12 +20,15 @@ class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _emailController = TextEditingController();
   late final TextEditingController _passwordController = TextEditingController();
   late StreamSubscription<AuthState> _authStateSubscription;
+  bool _isDarkMode = false; // Default licht thema
 
   final supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
+    _loadTheme(); // Laad dark mode instelling
+
     // Luister naar veranderingen in de authenticatiestatus
     _authStateSubscription = supabase.auth.onAuthStateChange.listen(
       (data) {
@@ -31,8 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         if (session != null) {
           _redirecting = true;
           Navigator.of(context).pushReplacement(
-//            MaterialPageRoute(builder: (context) => const GroupsPage()),
-            MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
+            MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
           );
         }
       },
@@ -54,6 +59,14 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // Laad de voorkeur voor dark mode
+  Future<void> _loadTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    });
+  }
+
   Future<void> _signIn() async {
     setState(() => _isLoading = true);
 
@@ -65,12 +78,10 @@ class _LoginPageState extends State<LoginPage> {
 
       final session = res.session;
       if (session != null) {
-        // Als er een sessie is, ga dan naar de groepenpagina
         if (mounted) {
           _redirecting = true;
           Navigator.of(context).pushReplacement(
-            //MaterialPageRoute(builder: (context) => const GroupsPage()),
-            MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
+            MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
           );
         }
       } else {
@@ -89,14 +100,22 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    _isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
+        actions: [
+          IconButton(
+            icon: Icon(_isDarkMode ? Icons.dark_mode : Icons.light_mode),
+            onPressed: widget.toggleTheme,
+          ),
+        ],
       ),
       body: Stack(
         children: [
           Opacity(
-            opacity: 0.05, // Stel de opaciteit in op 50%
+            opacity: 0.05,
             child: Image.asset(
               'assets/Icon-512.png',
               width: MediaQuery.of(context).size.width,
@@ -130,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegisterPage()),
+                        MaterialPageRoute(builder: (context) => RegisterPage(toggleTheme: widget.toggleTheme)),
                       );
                     },
                     child: const Text(

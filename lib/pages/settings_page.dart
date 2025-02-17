@@ -5,7 +5,8 @@ import 'sessions_page.dart';
 import 'package:team_maker2/pages/login_page.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final VoidCallback toggleTheme;
+  const SettingsPage({super.key, required this.toggleTheme});
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -94,28 +95,28 @@ class _SettingsPageState extends State<SettingsPage> {
       case 0:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
-          (route) => false, // Verwijder alle eerdere routes
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
+          (route) => false,
         );
         break;
       case 1:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 2:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
+          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 3:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
+          MaterialPageRoute(builder: (context) => SettingsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
@@ -259,7 +260,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
+          MaterialPageRoute(builder: (context) => LoginPage(toggleTheme: widget.toggleTheme)),
           (route) => false,);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -402,8 +403,10 @@ class _SettingsPageState extends State<SettingsPage> {
             )
           else
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: user!.userMetadata?['username'] ?? 'Geen gebruikersnaam',
+              icon: Icon(Icons.brightness_6),
+              label: Theme.of(context).brightness == Brightness.dark
+                ? 'Licht'
+                : 'Donker',
             ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.group),
@@ -420,13 +423,23 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[500]
+          : Colors.grey[900],
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (user == null && index == 0) {
-            return;
-          }
-          _onItemTapped(index);
+          setState(() {
+            _selectedIndex = index;
+            if (index == 0) {
+              if (user == null) {
+                // Logica voor inloggen als user == null
+              } else {
+                widget.toggleTheme(); // Als de gebruiker is ingelogd, wissel het thema
+              }
+            } else {
+              _onItemTapped(index); // Andere navigatie-items zoals voorheen
+            }
+          });      
         },
       ),
     );

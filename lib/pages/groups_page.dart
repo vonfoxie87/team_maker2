@@ -8,8 +8,14 @@ import 'settings_page.dart';
 import 'groups_detail_page.dart';
 
 class GroupsPage extends StatefulWidget {
-  const GroupsPage({Key? key, this.onGroupIdUpdate}) : super(key: key);
+  const GroupsPage({
+    Key? key,
+    this.onGroupIdUpdate,
+    required this.toggleTheme, // Voeg toggleTheme toe aan de constructor
+  }) : super(key: key);
+
   final Function(int?)? onGroupIdUpdate;
+  final VoidCallback toggleTheme; // Declareer toggleTheme als een final field
 
   @override
   _GroupsPageState createState() => _GroupsPageState();
@@ -85,7 +91,7 @@ class _GroupsPageState extends State<GroupsPage> {
       if (user == null) { // Alleen als er geen gebruiker is
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
       }
@@ -93,21 +99,21 @@ class _GroupsPageState extends State<GroupsPage> {
       case 1:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 2:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
+          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
       case 3:
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
+          MaterialPageRoute(builder: (context) => SettingsPage(toggleTheme: widget.toggleTheme)),
           (route) => false,
         );
         break;
@@ -327,7 +333,7 @@ class _GroupsPageState extends State<GroupsPage> {
             onPressed: _showCreateGroupDialog,
             icon: Icon(Icons.add),
             label: Text('Nieuwe groep'),
-          )
+          ),
         ],
       ),
       body: Stack(
@@ -375,7 +381,9 @@ class _GroupsPageState extends State<GroupsPage> {
                             child: ListTile(
                               title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Text('Laden...'),  // Toon laadbericht
-                              tileColor: Colors.grey[200],
+                              tileColor: Theme.of(context).brightness == Brightness.dark
+                                ? Color.fromRGBO(0, 0, 0, 0.2)
+                                : Colors.grey[200],
                               contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                               isThreeLine: true,
                             ),
@@ -395,7 +403,9 @@ class _GroupsPageState extends State<GroupsPage> {
                             child: ListTile(
                               title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Text('Fout bij het ophalen van leden'),  // Toon foutmelding
-                              tileColor: Colors.grey[200],
+                              tileColor: Theme.of(context).brightness == Brightness.dark
+                                ? Color.fromRGBO(0, 0, 0, 0.2)
+                                : Colors.grey[200],
                               contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                               isThreeLine: true,
                             ),
@@ -415,7 +425,9 @@ class _GroupsPageState extends State<GroupsPage> {
                           child: ListTile(
                             title: Text(group['name'], style: TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text('$groupCount leden'),  // Toon het aantal leden
-                            tileColor: Colors.grey[200],
+                            tileColor: Theme.of(context).brightness == Brightness.dark
+                              ? Color.fromRGBO(0, 0, 0, 0.2)
+                              : Colors.grey[200],
                             contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                             isThreeLine: true,
                             onTap: () {
@@ -424,7 +436,7 @@ class _GroupsPageState extends State<GroupsPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => GroupDetailPage(groupId: groupId),
+                                  builder: (context) => GroupDetailPage(groupId: groupId, toggleTheme: widget.toggleTheme),
                                 ),
                               );
                             },
@@ -454,8 +466,10 @@ class _GroupsPageState extends State<GroupsPage> {
             )
           else
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: user.userMetadata?['username'] ?? 'Profiel',
+              icon: Icon(Icons.brightness_6),
+              label: Theme.of(context).brightness == Brightness.dark
+            ? 'Licht'
+            : 'Donker', // Dynamisch label op basis van het thema
             ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.group),
@@ -472,9 +486,21 @@ class _GroupsPageState extends State<GroupsPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[500]
+          : Colors.grey[900],
         type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
+        onTap: (index) {
+        if (index == 0) {
+          if (user == null) {
+            // Logica voor inloggen als user == null
+          } else {
+            widget.toggleTheme(); // Als de gebruiker is ingelogd, wissel het thema
+          }
+        } else {
+          _onItemTapped(index); // Andere navigatie-items zoals voorheen
+        }
+      },
       ),
     );
   }

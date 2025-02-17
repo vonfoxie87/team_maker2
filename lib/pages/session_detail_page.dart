@@ -8,7 +8,8 @@ final supabase = Supabase.instance.client;
 
 class SessionDetailPage extends StatefulWidget {
   final Map<String, dynamic> session;
-  const SessionDetailPage({super.key, required this.session});
+  const SessionDetailPage({super.key, required this.session, required this.toggleTheme});
+  final VoidCallback toggleTheme;
 
   @override
   _SessionDetailPageState createState() => _SessionDetailPageState();
@@ -18,7 +19,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
   List<Map<String, dynamic>> _groupUsers = [];
   Map<String, String> _userAttendance = {};
   bool _isLoading = true;
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
   List<String> _ownerId = [];
   List<String> _admins = [];
 
@@ -108,7 +109,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => SessionsPage(groupId: null),
+          builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme),
         ),
       );
     } catch (error) {
@@ -145,6 +146,42 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
       });
     } catch (error) {
       print('Fout bij het bijwerken van aanwezigheid: $error');
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null,toggleTheme: widget.toggleTheme)),
+          (route) => false,
+        );
+        break;
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme)),
+        );
+        break;
+      case 3:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SettingsPage(toggleTheme: widget.toggleTheme)),
+        );
+        break;
+      default:
+        break;
     }
   }
 
@@ -254,7 +291,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                   Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SessionsPage(groupId: null),
+                          builder: (context) => SessionsPage(groupId: null, toggleTheme: widget.toggleTheme),
                         ),
                       );
                   // Navigator.of(context).pop();
@@ -267,6 +304,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
       );
     }
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -445,8 +483,10 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
             )
           else
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: user.userMetadata?['username'] ?? 'Profiel',
+              icon: Icon(Icons.brightness_6),
+              label: Theme.of(context).brightness == Brightness.dark
+                ? 'Licht'
+                : 'Donker',
             ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.group),
@@ -463,43 +503,22 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[500]
+          : Colors.grey[900],
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => GroupsPage()),
-              );
-              break;
-            case 1:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => GroupsPage()),
-              );
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SessionsPage(groupId: null)),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsPage()),
-              );
-              break;
-            default:
-              break;
+          if (index == 0) {
+            if (user == null) {
+            } else {
+              widget.toggleTheme();
+            }
+          } else {
+            _onItemTapped(index);
           }
         },
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _showEditSessionDialog,
         child: const Icon(Icons.edit),
@@ -507,4 +526,3 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
     );
   }
 }
-

@@ -11,7 +11,8 @@ final supabase = Supabase.instance.client;
 
 class SessionsPage extends StatefulWidget {
   final int? groupId;
-  const SessionsPage({super.key, required this.groupId});
+  const SessionsPage({super.key, required this.groupId, required this.toggleTheme});
+  final VoidCallback toggleTheme;
 
   @override
   _SessionsPageState createState() => _SessionsPageState();
@@ -128,14 +129,14 @@ class _SessionsPageState extends State<SessionsPage> {
         if (supabase.auth.currentUser == null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => GroupsPage()),
+            MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
           );
         }
         break;
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => GroupsPage()),
+          MaterialPageRoute(builder: (context) => GroupsPage(toggleTheme: widget.toggleTheme)),
         );
         break;
       case 2:
@@ -144,7 +145,7 @@ class _SessionsPageState extends State<SessionsPage> {
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
+          MaterialPageRoute(builder: (context) => SettingsPage(toggleTheme: widget.toggleTheme)),
         );
         break;
       default:
@@ -166,7 +167,7 @@ class _SessionsPageState extends State<SessionsPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const NewSessiePage(),
+                      builder: (context) => NewSessiePage(toggleTheme: widget.toggleTheme),
                     ),
                   );
                 },
@@ -217,14 +218,16 @@ class _SessionsPageState extends State<SessionsPage> {
                             'Duur: ${session['duration']}\nLocatie: ${session['location']}\nAanwezig: $attendingCount\nJij bent: ${isUserPresent ? 'Aanwezig' : 'Afwezig'}'
                           ),
                           trailing: Text('$groupName', style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
-                          tileColor: Colors.grey[200],
+                          tileColor: Theme.of(context).brightness == Brightness.dark
+                            ? Color.fromRGBO(0, 0, 0, 0.2)
+                            : Colors.grey[200],
                           contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                           isThreeLine: true,
                           onTap: () async {
                             bool? isPresent = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SessionDetailPage(session: session),
+                                builder: (context) => SessionDetailPage(session: session, toggleTheme: widget.toggleTheme),
                               ),
                             );
                             if (isPresent != null) {
@@ -249,8 +252,10 @@ class _SessionsPageState extends State<SessionsPage> {
             )
           else
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: user?.userMetadata?['username'] ?? 'Geen gebruikersnaam',
+              icon: Icon(Icons.brightness_6),
+              label: Theme.of(context).brightness == Brightness.dark
+                ? 'Licht'
+                : 'Donker',
             ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.group),
@@ -267,13 +272,23 @@ class _SessionsPageState extends State<SessionsPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[500]
+          : Colors.grey[900],
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (user == null && index == 0) {
-            return;
-          }
-          _onItemTapped(index);
+          setState(() {
+            _selectedIndex = index;
+            if (index == 0) {
+              if (user == null) {
+                // Logica voor inloggen als user == null
+              } else {
+                widget.toggleTheme(); // Als de gebruiker is ingelogd, wissel het thema
+              }
+            } else {
+              _onItemTapped(index); // Andere navigatie-items zoals voorheen
+            }
+          });      
         },
       ),
     );

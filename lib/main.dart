@@ -4,15 +4,31 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:team_maker2/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const String sbUrl = String.fromEnvironment('SB_URL', defaultValue: '');
-  const String sbKey = String.fromEnvironment('SB_KEY', defaultValue: '');
+  // Laad .env als deze lokaal bestaat
+  bool isLocal = false;
+  try {
+    await dotenv.load();
+    isLocal = dotenv.env.isNotEmpty;
+  } catch (e) {
+    debugPrint('Geen .env bestand gevonden, overschakelen naar dart-define');
+  }
+
+  // Gebruik .env als het lokaal is, anders dart-define
+  final String sbUrl = isLocal
+      ? dotenv.env['SB_URL'] ?? ''
+      : const String.fromEnvironment('SB_URL', defaultValue: '');
+
+  final String sbKey = isLocal
+      ? dotenv.env['SB_KEY'] ?? ''
+      : const String.fromEnvironment('SB_KEY', defaultValue: '');
 
   if (sbUrl.isEmpty || sbKey.isEmpty) {
-    debugPrint('❌ Supabase URL of Key ontbreekt! Controleer je dart-define instellingen.');
+    debugPrint('❌ Supabase URL of Key ontbreekt! Controleer je .env bestand of dart-define instellingen.');
     return;
   }
 
@@ -37,14 +53,31 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  ThemeMode _themeMode = ThemeMode.light; // Standaard licht thema
 
   @override
   void initState() {
     super.initState();
+    _loadTheme(); // Laad opgeslagen thema-instelling
+  }
 
-    // Initialiseer notificaties
-    final AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+  // Laad de opgeslagen thema-instelling
+  Future<void> _loadTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    setState(() {
+      _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  // Wissel tussen licht en donker en sla op
+  Future<void> _toggleTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isDark = _themeMode == ThemeMode.dark;
+    setState(() {
+      _themeMode = isDark ? ThemeMode.light : ThemeMode.dark;
+    });
+    await prefs.setBool('isDarkMode', !isDark);
   }
 
   // Functie om een melding te tonen
@@ -79,26 +112,25 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Team maker',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      // Zet de locale en zorg ervoor dat de lokale gegevens worden geladen.
+      title: 'Team Maker',
+      theme: ThemeData.light(),  // Licht thema
+      darkTheme: ThemeData.dark(), // Donker thema
+      themeMode: _themeMode,  // Dynamisch wisselen
+
       locale: Locale('nl', 'NL'),
       supportedLocales: [
-        Locale('nl', 'NL'), // Nederlands als ondersteunde taal
-        Locale('en', 'US'), // Engels als backup
+        Locale('nl', 'NL'),
+        Locale('en', 'US'),
       ],
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: LoginPage(),
+      home: LoginPage(toggleTheme: _toggleTheme), // Geef toggle functie door
     );
   }
 }
