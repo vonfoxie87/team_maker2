@@ -309,12 +309,12 @@ class _GroupsPageState extends State<GroupsPage> {
         .single();  // Haal een enkel record op in plaats van een lijst
 
     if (response != null) {
-      final members = List<String>.from(response['members']);
-      final admins = List<String>.from(response['admins']);
+    final members = List<String>.from(response['members']);
+    final admins = List<String>.from(response['admins']);
 
-      // Tel het aantal unieke leden (admins + members)
-      final totalMembers = (members.toSet().union(admins.toSet())).length;
-      return totalMembers;
+    // Tel het aantal unieke leden (admins + members)
+    final totalMembers = (members.toSet().union(admins.toSet())).length;
+    return totalMembers;
     }
     return 0;  // Als er geen data is, geef 0 terug
   }

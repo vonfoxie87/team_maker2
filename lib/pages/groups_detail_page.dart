@@ -71,7 +71,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         if (userResponse != null) {
           users.add(userResponse);
         } else {
-          // ignore_for_file: avoid_print
           print('User with ID $userId not found.');
         }
       }
@@ -322,7 +321,6 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                             final username = user['username'];
 
                             bool isAdmin = admins.contains(userId);  // Controleer of de gebruiker een admin is
-                            bool isCurrentUser = userId == supabase.auth.currentUser?.id;
                             bool isCurrentUserAdmin = false;
 
                             // Controleer of de huidige gebruiker een admin is

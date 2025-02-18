@@ -58,11 +58,7 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
             .eq('id', validUserId)
             .single();
 
-        if (userResponse != null) {
-          users.add(userResponse);
-        } else {
-          print('Gebruiker met ID $validUserId niet gevonden.');
-        }
+        users.add(userResponse);
       }
 
       setState(() {

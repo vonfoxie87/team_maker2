@@ -94,9 +94,7 @@ class _SessionsPageState extends State<SessionsPage> {
             .eq('id', groupId)
             .single();
 
-        if (groupResponse != null) {
-          session['group_name'] = groupResponse['name'];
-        }
+        session['group_name'] = groupResponse['name'];
         
         // Haal de deelnemers voor de sessie op uit de 'session_participants' tabel
         final participantsResponse = await supabase

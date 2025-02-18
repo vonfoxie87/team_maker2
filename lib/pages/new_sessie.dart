@@ -55,14 +55,13 @@ class _NewSessiePageState extends State<NewSessiePage> {
           .contains('members', [user.id]);
           //.eq('user_id', user.id);
 
-      if (response != null) {
-        setState(() {
-          _groups = List<Map<String, dynamic>>.from(response);
-          if (_groups.isNotEmpty) {
-            _selectedGroupId = _groups[0]['id']; // Standaard de eerste groep selecteren
-          }
-        });
-      }
+      setState(() {
+        _groups = List<Map<String, dynamic>>.from(response);
+        if (_groups.isNotEmpty) {
+          _selectedGroupId = _groups[0]['id']; // Standaard de eerste groep selecteren
+        }
+      });
+      
     } catch (error) {
       print('Fout bij het ophalen van groepen: $error');
     }
